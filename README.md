@@ -1,1 +1,3 @@
-# galvanize-magonote
+# magonote
+
+A recommender for [https://itch.io/]
