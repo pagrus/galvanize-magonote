@@ -59,7 +59,24 @@ def get_post_info(post_list, post_dir):
         with open (post_path, 'r') as pfh:
             pt = pfh.read()
         psoup = bs(pt, "lxml")
-        post_tup = (post_id, 'urg urg')
+        
+        post_divs = psoup.find_all('div', class_='post_content')        
+        post_div_count = len(post_divs)     
+        if post_div_count > 0:
+            div_zero = post_divs[0]
+            dz_spans = div_zero.find_all('span')
+            dz_span_count = len(dz_spans)
+            if dz_span_count > 2:
+                dz_span_a = dz_spans[0]
+                dz_span_b = dz_spans[1]
+        else:
+            div_zero = 'zip'  
+            dz_span_count = 0
+            div_zero = 'zilcho, 404 probs'         
+            dz_span_a = ''
+            dz_span_b = ''
+        
+        post_tup = (post_id, post_div_count, dz_span_count, dz_span_a, dz_span_b)
         post_details.append(post_tup)
     return post_details
 
