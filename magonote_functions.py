@@ -56,7 +56,7 @@ def get_post_info(post_list, post_dir):
     for post_file in post_list:
         post_id = int(post_file[:-5])
         post_path = post_dir + "/" + post_file
-        with open (post_path, 'r') as pfh:
+        with open (post_path, 'r', encoding="ISO-8859-1") as pfh:
             pt = pfh.read()
         psoup = bs(pt, "lxml")
         
