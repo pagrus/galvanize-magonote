@@ -1,3 +1,26 @@
+import pandas as pd
+import numpy as np
+from bs4 import BeautifulSoup as bs
+import requests
+import os
+import pickle
+import boto3
+import re
+import time
+
+def get_game_info(game_list, game_dir):
+    for game_file in game_list:
+        game_path = game_dir + "/" + game_file
+        with open (game_path, 'r') as gfh:
+            gt = gfh.read()
+        gsoup = bs(gt, "lxml")
+        title_txt = gsoup.title.string
+        footer_div = gsoup.find('div', id='view_game_footer')
+        creator_url = footer_div.findAll('a')[2]
+        view_all_txt = footer_div.findAll('a')[2].get_text()
+        creator_txt = view_all_txt[12:]
+        print(title_txt, creator_txt, creator_url)
+
 def gamelist(url):
 
     r = requests.get(url)
