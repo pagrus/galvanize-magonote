@@ -9,6 +9,13 @@ import re
 import time
 
 def get_game_info(game_list, game_dir):
+
+# given a list of filenames and a dir, returns a list of tuples
+# should probably add game id and game url to return vals
+# the bs stuff looks pretty hairy but it seems to work all the time?
+# maybe it should write to a CSV or something instead of returning vals
+
+    game_details = list()    
     for game_file in game_list:
         game_path = game_dir + "/" + game_file
         with open (game_path, 'r') as gfh:
@@ -20,7 +27,9 @@ def get_game_info(game_list, game_dir):
         view_all_txt = footer_div.findAll('a')[2].get_text()
         creator_txt = view_all_txt[12:]
         title_txt = title_txt_full[:-(len(creator_txt) + 4)]
-        print(title_txt, creator_txt, creator_url)
+        game_tup = (title_txt, creator_txt, creator_url)
+        game_details.append(game_tup)
+    return game_details
 
 def gamelist(url):
 
