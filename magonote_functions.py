@@ -22,14 +22,24 @@ def get_game_info(game_list, game_dir):
         with open (game_path, 'r') as gfh:
             gt = gfh.read()
         gsoup = bs(gt, "lxml")
-        title_txt_full = gsoup.title.string
+        if gsoup.title:
+            title_txt_full = gsoup.title.string
+        else:
+            title_txt_full = 'wtf, no title?'
         footer_div = gsoup.find('div', id='view_game_footer')
-        footer_anchors = footer_div.findAll('a')
-        creator_url = footer_anchors[2]['href']
-        view_all_txt = footer_anchors[2].get_text()
-        game_url = footer_anchors[4]['data-lightbox_url'][:-6]
-        creator_txt = view_all_txt[12:]
-        title_txt = title_txt_full[:-(len(creator_txt) + 4)]
+        # fuck, some pages don't have footers
+        if footer_div:
+            footer_anchors = footer_div.findAll('a')
+            creator_url = footer_anchors[2]['href']
+            view_all_txt = footer_anchors[2].get_text()
+            game_url = footer_anchors[4]['data-lightbox_url'][:-6]
+            creator_txt = view_all_txt[12:]
+            title_txt = title_txt_full[:-(len(creator_txt) + 4)]
+        else:
+            title_txt = title_txt_full
+            creator_txt = 'no footer!'
+            creator_url = 'urg urg urg'
+            game_url = 'eff these guys'
         
         game_tup = (game_id, title_txt, creator_txt, creator_url, game_url)
         game_details.append(game_tup)
