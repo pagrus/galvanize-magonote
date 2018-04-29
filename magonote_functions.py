@@ -22,12 +22,16 @@ def get_game_info(game_list, game_dir):
         with open (game_path, 'r') as gfh:
             gt = gfh.read()
         gsoup = bs(gt, "lxml")
+        
+        # wtfwtf! no title?
         if gsoup.title:
             title_txt_full = gsoup.title.string
         else:
             title_txt_full = 'wtf, no title?'
         footer_div = gsoup.find('div', id='view_game_footer')
+        
         # fuck, some pages don't have footers
+        # well only five out of 2600, huh. 
         if footer_div:
             footer_anchors = footer_div.findAll('a')
             creator_url = footer_anchors[2]['href']
