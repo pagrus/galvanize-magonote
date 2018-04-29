@@ -14,11 +14,12 @@ def get_game_info(game_list, game_dir):
         with open (game_path, 'r') as gfh:
             gt = gfh.read()
         gsoup = bs(gt, "lxml")
-        title_txt = gsoup.title.string
+        title_txt_full = gsoup.title.string
         footer_div = gsoup.find('div', id='view_game_footer')
-        creator_url = footer_div.findAll('a')[2]
+        creator_url = footer_div.findAll('a')[2]['href']
         view_all_txt = footer_div.findAll('a')[2].get_text()
         creator_txt = view_all_txt[12:]
+        title_txt = title_txt_full[:-(len(creator_txt) + 4)]
         print(title_txt, creator_txt, creator_url)
 
 def gamelist(url):
