@@ -17,17 +17,21 @@ def get_game_info(game_list, game_dir):
 
     game_details = list()    
     for game_file in game_list:
+        game_id = int(game_file[:-5])
         game_path = game_dir + "/" + game_file
         with open (game_path, 'r') as gfh:
             gt = gfh.read()
         gsoup = bs(gt, "lxml")
         title_txt_full = gsoup.title.string
         footer_div = gsoup.find('div', id='view_game_footer')
-        creator_url = footer_div.findAll('a')[2]['href']
-        view_all_txt = footer_div.findAll('a')[2].get_text()
+        footer_anchors = footer_div.findAll('a')
+        creator_url = footer_anchors[2]['href']
+        view_all_txt = footer_anchors[2].get_text()
+        game_url = footer_anchors[4]['data-lightbox_url'][:-6]
         creator_txt = view_all_txt[12:]
         title_txt = title_txt_full[:-(len(creator_txt) + 4)]
-        game_tup = (title_txt, creator_txt, creator_url)
+        
+        game_tup = (game_id, title_txt, creator_txt, creator_url, game_url)
         game_details.append(game_tup)
     return game_details
 
