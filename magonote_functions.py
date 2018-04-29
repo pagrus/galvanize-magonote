@@ -60,23 +60,35 @@ def get_post_info(post_list, post_dir):
             pt = pfh.read()
         psoup = bs(pt, "lxml")
         
+        trail_anchors = psoup.find_all('a', class_='trail')
+        trail_anchor_count = len(trail_anchors)
+        if trail_anchor_count > 0:
+            trail_anchor_zero = trail_anchors[0]
+        else:
+            trail_anchor_zero = ''        
+        
         post_divs = psoup.find_all('div', class_='post_content')        
         post_div_count = len(post_divs)     
         if post_div_count > 0:
             div_zero = post_divs[0]
+            div_zero_length = len(div_zero.getText())
             dz_spans = div_zero.find_all('span')
             dz_span_count = len(dz_spans)
             if dz_span_count > 2:
+                # dz_span_a = dz_spans[0].string
+                # dz_span_b = dz_spans[1]['title']
+                # actually maybe just leave all that stuff in there
                 dz_span_a = dz_spans[0]
                 dz_span_b = dz_spans[1]
         else:
-            div_zero = 'zip'  
+            div_zero = 'zip'
+            div_zero_length = 0  
             dz_span_count = 0
             div_zero = 'zilcho, 404 probs'         
             dz_span_a = ''
             dz_span_b = ''
         
-        post_tup = (post_id, post_div_count, dz_span_count, dz_span_a, dz_span_b)
+        post_tup = (post_id, trail_anchor_count, trail_anchor_zero, post_div_count, div_zero_length, dz_span_count, dz_span_a, dz_span_b)
         post_details.append(post_tup)
     return post_details
 
