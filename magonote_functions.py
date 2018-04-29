@@ -49,6 +49,20 @@ def get_game_info(game_list, game_dir):
         game_details.append(game_tup)
     return game_details
 
+def get_post_info(post_list, post_dir):
+# given a list of filenames and a dir, returns a list of tuples
+
+    post_details = list()    
+    for post_file in post_list:
+        post_id = int(post_file[:-5])
+        post_path = post_dir + "/" + post_file
+        with open (post_path, 'r') as pfh:
+            pt = pfh.read()
+        psoup = bs(pt, "lxml")
+        post_tup = (post_id, 'urg urg')
+        post_details.append(post_tup)
+    return post_details
+
 def gamelist(url):
 
     r = requests.get(url)
