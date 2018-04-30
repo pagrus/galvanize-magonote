@@ -22,6 +22,8 @@ def get_game_info(game_list, game_dir):
         with open (game_path, 'r') as gfh:
             gt = gfh.read()
         gsoup = bs(gt, "lxml")
+        fulltext = gsoup.body.get_text()
+        # fulltext = list(gsoup.stripped_strings)
         
         # wtfwtf! no title?
         if gsoup.title:
@@ -45,7 +47,7 @@ def get_game_info(game_list, game_dir):
             creator_url = 'urg urg urg'
             game_url = 'eff these guys'
         
-        game_tup = (game_id, title_txt, creator_txt, creator_url, game_url)
+        game_tup = (game_id, title_txt, creator_txt, creator_url, game_url, fulltext)
         game_details.append(game_tup)
     return game_details
 
