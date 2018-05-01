@@ -8,6 +8,50 @@ import boto3
 import re
 import time
 
+def get_tag_url_list(tag_html_file):
+    with open (tag_html_file, 'r') as tfh:
+        tf_html = tfh.read()
+    soup = bs(tf_html, "lxml")
+    div_class = "tag_list"
+    tag_div = soup.find("div", class_=div_class)
+    tag_anchors = tag_div.find_all("a")
+    tag_list = list()
+    for ta in tag_anchors:
+        turl = ta['href']
+        tlab = ta['data-label']
+        ttxt = ta.get_text()
+        ttup = (tlab, ttxt, turl)
+        tag_list.append(ttup)
+    return tag_list
+    
+def get_tag_html(tag_list):
+    for tag in tag_list:
+        # compare https://itch.io:443/games/newest/genre-action
+        turl = "https://itch.io:443/games/newest/tag-" + tag[0]
+        tpath = "html/tags/" + tag[0] + ".html"
+        r = requests.get(turl)
+        if r.status_code == 200:
+            with open(tpath, 'wb') as tfh:
+                tfh.write(r.content)
+                
+def parse_tag_html(tag_dir):
+    tag_details = list()    
+    tag_file_list = [x for x in os.listdir(tag_dir) if x[-5:] == ".html"]
+    for tag_file in tag_file_list:
+        tag_path = tag_dir + tag_file
+        with open (tag_path, 'r') as tffh:
+            tft = tffh.read()
+        tsoup = bs(tft, "lxml")
+        fpg = tsoup.find_all("div", class_="game_cell_data")
+        gcfp = len(fpg)
+        gcnb = tsoup.find("nobr", class_="game_count")
+        game_count_text = gcnb.get_text()
+        game_count_str = re.findall('\d+', game_count_text)
+        game_count = int(''.join(game_count_str))
+        tag_tup = (tag_file, game_count, gcfp)
+        tag_details.append(tag_tup)
+    return tag_details
+    
 def get_game_info(game_list, game_dir):
 
 # given a list of filenames and a dir, returns a list of tuples
