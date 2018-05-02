@@ -8,6 +8,35 @@ import boto3
 import re
 import time
 
+def parse_game_list_page(file_path):
+    with open (file_path, 'r') as fh:
+        rt = fh.read()
+    soup = bs(rt, "lxml")
+    # print(soup.prettify())
+    gc_hc_divs = soup.find_all("div", class_="game_cell")
+    for gdiv in gc_hc_divs:
+        print("-.-.-.-.-.-.-.-.-..-.-.-.-.-.-.-.-")
+        anchors = gdiv.find_all("a", class_="title game_link")
+        for anchor in anchors:
+            print(anchor.prettify())
+
+def get_latest_game_list(page):
+    lurl = "https://itch.io:443/games/newest?page={}".format(page)
+    lpath = "html/latest/{}.html".format(page)
+    r = requests.get(lurl)
+    if r.status_code == 200:
+        with open(lpath, 'wb') as lfh:
+            lfh.write(r.content)
+
+def agg_tag_asses(tag_top):
+    big_ass_list = list()
+    for item in os.listdir(tag_top):
+        tagdir = tag_top + '/' + item
+        if os.path.isdir(tagdir):
+            this_ass_set = mf.get_tag_assignments(tagdir)
+            big_ass_list.append(this_ass_set)
+    return big_ass_list
+
 def get_tag_assignments(tag_dir):
     tag_assignments = list()    
     tag_file_list = [x for x in os.listdir(tag_dir) if x[-5:] == ".html"]
@@ -20,7 +49,7 @@ def get_tag_assignments(tag_dir):
         for game in title_divs:
             anchor = game.find('a')
             href = anchor['href']            
-            ass_tup = (tag_dir[10:], href)
+            ass_tup = (tag_dir[15:], href)
             tag_assignments.append(ass_tup)
     return tag_assignments
 
@@ -227,8 +256,8 @@ def tagscrape(taglist):
         tclist.append(gctup)
     return tclist
 
-def gamelist_from_file(file):
-    with open (file, 'r') as fh:
+def game_list_from_file(file_path):
+    with open (file_path, 'r') as fh:
         rt = fh.read()
     soup = bs(rt, "lxml")
     lclass = "title game_link"
@@ -241,6 +270,8 @@ def gamelist_from_file(file):
         lab = anc['data-label']
         gid = lab.split(':')
         ltup = (txt, href, int(gid[1]))
+        # insert into db        
+        # cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def"))
         lset.add(ltup)
     return list(lset)
 
