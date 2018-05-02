@@ -8,6 +8,22 @@ import boto3
 import re
 import time
 
+def get_tag_assignments(tag_dir):
+    tag_assignments = list()    
+    tag_file_list = [x for x in os.listdir(tag_dir) if x[-5:] == ".html"]
+    for tag_html_file in tag_file_list:
+        file_path = tag_dir + '/' + tag_html_file
+        with open (file_path, 'r') as tfh:
+            tf_html = tfh.read()
+        soup = bs(tf_html, "lxml")
+        title_divs = soup.find_all("div", class_='game_title')
+        for game in title_divs:
+            anchor = game.find('a')
+            href = anchor['href']            
+            ass_tup = (tag_dir[10:], href)
+            tag_assignments.append(ass_tup)
+    return tag_assignments
+
 def get_tag_url_list(tag_html_file):
     with open (tag_html_file, 'r') as tfh:
         tf_html = tfh.read()
@@ -38,6 +54,7 @@ def parse_tag_html(tag_dir):
     tag_details = list()    
     tag_file_list = [x for x in os.listdir(tag_dir) if x[-5:] == ".html"]
     for tag_file in tag_file_list:
+        tag_slug = tag_file[:-5]
         tag_path = tag_dir + tag_file
         with open (tag_path, 'r') as tffh:
             tft = tffh.read()
@@ -48,9 +65,32 @@ def parse_tag_html(tag_dir):
         game_count_text = gcnb.get_text()
         game_count_str = re.findall('\d+', game_count_text)
         game_count = int(''.join(game_count_str))
-        tag_tup = (tag_file, game_count, gcfp)
+        tag_tup = (tag_slug, game_count, gcfp)
         tag_details.append(tag_tup)
     return tag_details
+    
+def get_games_from_tag(tag_slug, game_count):
+    html_base_path = 'html/tags'
+    # https://itch.io/games/newest/tag-horror?page=2
+    n_pages = ( game_count // 30 ) + 1
+    tag_url_base = "https://itch.io/games/newest/tag-"
+    for page in range(n_pages):
+        slug_path = html_base_path + '/' + tag_slug
+        try:
+            os.makedirs(slug_path)
+        except OSError:
+            pass
+        if page == 0:
+            page_url = tag_url_base + tag_slug
+        else:
+            page_url = tag_url_base + tag_slug + '?page=' + str(page + 1)
+        html_path = slug_path + '/' + tag_slug + '_' +  str(page + 1) + ".html"
+        r = requests.get(page_url)
+        time.sleep(0.5)
+        if r.status_code == 200:
+            with open(html_path, 'wb') as hpfh:
+                hpfh.write(r.content)
+    
     
 def get_game_info(game_list, game_dir):
 
