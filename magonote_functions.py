@@ -8,17 +8,14 @@ import boto3
 import re
 import time
 
-def parse_game_list_page(file_path):
-    with open (file_path, 'r') as fh:
-        rt = fh.read()
-    soup = bs(rt, "lxml")
-    # print(soup.prettify())
-    gc_hc_divs = soup.find_all("div", class_="game_cell")
-    for gdiv in gc_hc_divs:
-        print("-.-.-.-.-.-.-.-.-..-.-.-.-.-.-.-.-")
-        anchors = gdiv.find_all("a", class_="title game_link")
-        for anchor in anchors:
-            print(anchor.prettify())
+def get_game_count_from_tag_html(html):
+    soup = bs(html, "lxml")
+    count_class = "game_count"
+    gcount = soup.find("nobr", class_=count_class)
+    gctxt = gcount.get_text()
+    gcdig = u''.join(c for c in gctxt if '0' <= c <= '9')
+    # gctup = (tag[0], tag[1], gcdig, tag[2])
+    return int(gcdig)
 
 def get_latest_game_list(page):
     lurl = "https://itch.io:443/games/newest?page={}".format(page)
@@ -53,10 +50,8 @@ def get_tag_assignments(tag_dir):
             tag_assignments.append(ass_tup)
     return tag_assignments
 
-def get_tag_url_list(tag_html_file):
-    with open (tag_html_file, 'r') as tfh:
-        tf_html = tfh.read()
-    soup = bs(tf_html, "lxml")
+def get_tag_info(tag_html):
+    soup = bs(tag_html, "lxml")
     div_class = "tag_list"
     tag_div = soup.find("div", class_=div_class)
     tag_anchors = tag_div.find_all("a")
@@ -119,7 +114,18 @@ def get_games_from_tag(tag_slug, game_count):
         if r.status_code == 200:
             with open(html_path, 'wb') as hpfh:
                 hpfh.write(r.content)
-    
+                
+def get_game_list_from_single_tag_page(tag_slug, page_number):
+    url = "https://itch.io/games/newest/tag-{}?page={}".format(tag_slug, page_number)
+    r = requests.get(url)
+    rt = r.text
+    soup = bs(rt, "lxml")
+    game_divs = soup.find_all("div", class_='game_cell')
+    game_id_list = list()    
+    for cell in game_divs:
+        game_id = cell['data-game_id']
+        game_id_list.append(game_id)
+    return game_id_list
     
 def get_game_info(game_list, game_dir):
 
@@ -257,6 +263,13 @@ def tagscrape(taglist):
     return tclist
 
 def game_list_from_file(file_path):
+    """
+
+    given a file path, returns a list of tuples containing the game name, url, and id    
+    the id is unique as far as i can tell
+    
+    """    
+    
     with open (file_path, 'r') as fh:
         rt = fh.read()
     soup = bs(rt, "lxml")
@@ -269,11 +282,43 @@ def game_list_from_file(file_path):
         href = anc['href']
         lab = anc['data-label']
         gid = lab.split(':')
-        ltup = (txt, href, int(gid[1]))
+        ltup = (int(gid[1]), txt, href)
         # insert into db        
         # cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def"))
         lset.add(ltup)
     return list(lset)
+    
+def insert_game_into_db(game_list, db_connection):
+    """
+    
+    takes a list of tuples and a db connection, inserts into a db
+    if it takes a long time it might be because it's getting a set of game_id items 
+    for every batch of INSERTs, it was either that or make a bunch of try/except blocks
+    to skip duplicate game ids. still not sure what the best way to go about that is 
+    if your data is sloppy/lazy
+    
+    """
+    cur = db_connection.cursor()
+    cur.execute('SELECT game_id FROM itch_game')
+    id_result = cur.fetchall()
+    id_set =  set([item for sublist in id_result for item in sublist])
+    for item in game_list:
+        if item[0] not in id_set:
+            cur.execute("INSERT INTO itch_game (game_id, name, url) VALUES (%s, %s, %s)", item)
+            db_connection.commit()
+    cur.close()
+
+def update_tag_associations(game_list, tag_id, db_connection):
+    cur = db_connection.cursor()
+    cur.execute('SELECT game_id FROM itch_tag_assignments WHERE tag_id=%s', (tag_id, ))
+    tag_asses = cur.fetchall()
+    tag_ass_set =  set([item for sublist in tag_asses for item in sublist])
+    for new_ass in game_list:
+        if int(new_ass) not in tag_ass_set: 
+            cur.execute("INSERT INTO itch_tag_assignments (game_id, tag_id) VALUES (%s, %s)", (new_ass, tag_id))
+            db_connection.commit()
+    cur.close()
+
 
 def info_from_game_page_file(file):
     with open (file, 'r') as fh:

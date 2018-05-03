@@ -1,6 +1,7 @@
 import psycopg2
 import requests
 import magonote_functions as mf
+from db_info import db_name, db_user, db_pw, db_host
 
 """
 
@@ -14,11 +15,6 @@ tag_list_url = 'https://itch.io/tags'
 r = requests.get(tag_list_url)
 rt = r.text
 tag_info = mf.get_tag_info(rt)
-
-db_name = 'itchbot'
-db_user = 'itchbot'
-db_pw = 'IB!0502'
-db_host = '127.0.0.1'
 
 db_connection = psycopg2.connect( database=db_name, user=db_user, host=db_host, password=db_pw )
 
