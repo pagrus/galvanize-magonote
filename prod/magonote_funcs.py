@@ -18,7 +18,7 @@ def get_userids_from_html(html_txt):
     apl = len(abs_pre)
     soup = bs(html_txt, "lxml")
     
-    all_links = soup.find_all('a')
+    all_links = soup.find_all('a', href=True)
     if len(all_links) > 0:
         for link in all_links:
             href = link['href']
