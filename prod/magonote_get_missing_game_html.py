@@ -23,11 +23,20 @@ cur = db_connection.cursor()
 
 cur.execute('SELECT game_id, name, url FROM itch_game_detail_with_html WHERE game_html IS NULL ORDER BY RANDOM()')
 null_game_result = cur.fetchall()
+nglen = len(null_game_result)
+
+print("found {} game rows with null html fields".format(nglen))
+
+nullcount = 0
 
 for null_game in null_game_result:
+    nullcount += 1
     print("sleeping 2s...")
     time.sleep(1)
+    
     game_url = null_game[2]
+    nullpct = (nullcount * 100) // nglen
+    print("attempting to retrieve {} - item {} of {} - %{} of total".format(game_url, nullcount, nglen, nullpct))
     r = requests.get(game_url)
     if r.status_code == 200:
         game_html = r.content
