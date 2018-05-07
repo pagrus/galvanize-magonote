@@ -36,7 +36,7 @@ for null_game in null_game_result:
     
     game_url = null_game[2]
     nullpct = (nullcount * 100) // nglen
-    print("attempting to retrieve {} - item {} of {} - %{} of total".format(game_url, nullcount, nglen, nullpct))
+    print("attempting to retrieve {} - item {} of {} - {}% of total".format(game_url, nullcount, nglen, nullpct))
     r = requests.get(game_url)
     if r.status_code == 200:
         game_html = r.content
