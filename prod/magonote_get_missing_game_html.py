@@ -39,7 +39,8 @@ for null_game in null_game_result:
     print("attempting to retrieve {} - item {} of {} - {}% of total".format(game_url, nullcount, nglen, nullpct))
     r = requests.get(game_url)
     if r.status_code == 200:
-        game_html = r.content
+        game_html = r.text
+        # print(game_html)
         game_id = null_game[0]
         game_tup = (game_id, game_html)
         print("inserting html for game {}...".format(game_id))

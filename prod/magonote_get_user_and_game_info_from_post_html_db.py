@@ -1,3 +1,4 @@
+import time
 from bs4 import BeautifulSoup as bs
 import psycopg2
 import magonote_funcs as mf
@@ -21,6 +22,12 @@ totals: pb = 330795, io = 69303, ei = 0
 db_connection = psycopg2.connect( database=db_name, user=db_user, host=db_host, password=db_pw )
 cur = db_connection.cursor()
 
+game_dict = dict()
+cur.execute("SELECT game_id, url FROM itch_game")
+for game_row in cur:
+    game_dict[game_row[1]] = game_row[0]
+
+
 cur.execute("SELECT post_id, post_html FROM itch_post_html")
 # cur.execute("SELECT post_id, SUBSTRING (post_html, 188, 100) FROM itch_post_html LIMIT 50")
 
@@ -35,7 +42,7 @@ for row in cur:
         if link_type == '"https://':
             # print(link_type)
             # print(trail_anchors[0])
-            link_str = str(trail_anchors[0])[31:-4]
+            link_str = str(trail_anchors[0])[23:-4]
             link_list = link_str.split('">')
             print(link_list)
         
@@ -52,12 +59,24 @@ for row in cur:
                 if len(post_body) > 0:
                     body_div = str(post_body[0])
                     print(len(body_div))
-                    print("----------------------------------------\n\n")
+                    # print("----------------------------------------\n\n")
                     
-                    post_tup = (row[0], author_list[0], author_list[1], link_list[0], link_list[1], body_div)
-                    insert_list.append(post_tup)
+                    post_stamp = soup.find_all('span', class_='post_date')
+                    if len(post_stamp) > 0:
+                        stamp_txt = str(post_stamp[0])[31:50]
+                        utime = time.mktime(time.strptime(stamp_txt, "%Y-%m-%d %H:%M:%S"))
+                        print(stamp_txt)
+                        print(utime)
+                        
+                        if link_list[0] in game_dict:
+                            game_id = game_dict[link_list[0]]
+                            print("game id: {}".format(game_id))
+                            print("----------------------------------------\n\n")
+                    
+                            post_tup = (row[0], stamp_txt, author_list[0], author_list[1], game_id, link_list[0], link_list[1], body_div)
+                            insert_list.append(post_tup)
                     
 for insert_tup in insert_list:
-    print("inserting post {} div details...".format(row[0]))
-    cur.execute("INSERT INTO itch_post_div_detail (post_id, user_slug, user_name, game_url, game_name, body_div) VALUES (%s, %s, %s, %s, %s, %s)", insert_tup)
+    print("inserting post {} div details...".format(insert_tup[0]))
+    cur.execute("INSERT INTO itch_post_div_detail (post_id, stamp, user_slug, user_name, game_id, game_url, game_name, body_div) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", insert_tup)
     db_connection.commit()

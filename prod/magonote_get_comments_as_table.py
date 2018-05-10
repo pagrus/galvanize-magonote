@@ -26,20 +26,6 @@ query = """
     LIMIT 25
 """
 
-# cur.execute('SELECT user_slug, game_url, SUM(div_len) AS score FROM itch_post_div_lengths GROUP BY user_slug, game_url ORDER BY RANDOM() LIMIT 25')
 cur.execute(query)
-
-# import psycopg2
-# conn = psycopg2.connect("dbname='db' user='user' host='host' password='pass'")
-# cur = conn.cursor()
-# cur.execute("select instrument, price, date from my_prices")
 df = pd.DataFrame(cur.fetchall(), columns=['user slug', 'game url', 'score'])
-# then set index like
-
-# df.set_index('date', drop=False)
-
-# or directly:
-
-# df.index =  df['date']
-
 print(df)
