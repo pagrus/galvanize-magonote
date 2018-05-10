@@ -29,6 +29,8 @@ cur.execute(query)
 game_df = pd.DataFrame(cur.fetchall(), columns=['game id', 'game name', 'game url', 'html'])
 print(game_df)
 
+# yeah uh you're going to have to beautifulsoup the html at some point
+
 add_stop_words = ('commentslog', 'loader_outer', 'loading_lightbox', 
     'itchio', 'report', 'zip', 'view', 'comment', 'post', 'upvotes', 
     'account', 'post_id', 'report_url', 'io', 'game', 'nowname', 
