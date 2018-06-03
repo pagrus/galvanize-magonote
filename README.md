@@ -33,8 +33,41 @@ positive. Sentiment analysis was not performed on comments but that is
 certainly something that could be useful in the future. Fortunately comments 
 are indexed sequentially which makes retrieval fairly straightforward.
 
+## Tools
+
+Magonote is written in python and relies on requests, Beautiful Soup, 
+SciKit-learn, psycopg2, pandas, numpy &c.
+
+Some of the scraping was attempted first using cURL but 
+throttling/rate-limiting became an issue and requests was used instead.
+
+PostgreSQL provides the DB, and it is hosted on an AWS EC2 Ubuntu instance with 
+some S3 storage.
+
+## Outcomes
+
+The matricies are pretty sparse and it was difficult to determine how useful 
+the predictions were. Validation for recommenders is difficult under the best 
+of circumstances and so attempting to do so was postponed pending new data 
+being made available.
+
+Anecdotal evidence suggests that while recommendations are better than random 
+there is some room for improvement.
+
+## Future work
+
+Possibilities for improvements include
+
+- sentiment analysis
+- better use of tags, weighting
+- scheduled/automatic updating
+- incorporate new/better data
+
+## Name
 
 From [magonote](https://jisho.org/search/%E5%AD%AB%E3%81%AE%E6%89%8B)
+
+
 
 
 
