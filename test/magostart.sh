@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# start up jupyter on remote machine with
-# jupyter notebook --no-browser --ip=0.0.0.0 --port=65432 --NotebookApp.token=''
-# for reference this will start jupyter in your home dir
-# jupyter notebook --notebook-dir=/home/username
-# default home dir on aws ubuntu install
-# /home/ubuntu/galvanize-magonote/
+# start up jupyter on remote (aws) machine with
+# jupyter notebook --no-browser --notebook-dir=/home/ubuntu/galvanize-magonote/ --ip=0.0.0.0 --port=65432 --NotebookApp.token=''
 
 # start up ssh tunnel to ec2 jupiter
 ssh -NfL 65432:localhost:65432 magonote
