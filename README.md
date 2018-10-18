@@ -9,7 +9,7 @@ I am fond of video games but find myself struggling to find ones that satisfy
 my specific interests.
 
 Itch.io is a distubution service/platform that serves smaller independent 
-creators and studios, and as such tends to have more interesting experiental 
+creators and studios, and as such tends to have more interesting experimental 
 types of games. The upshot of this is that games don't fall into traditional
 categories (fighting/racing/rpg/etc) as much which can make discovery more 
 difficult. 
